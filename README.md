@@ -91,3 +91,8 @@ vpc_target_id = module.vpc_b.vpc_id
 |------|---------|
 | Terraform | >= 1.5 |
 | airtelcloud Provider | >= 1.0.4 |
+## Important Notes
+
+- Either vpc_source_id or vpc_source_name must be provided.
+- Either vpc_target_id or vpc_target_name must be provided.
+- allowed_subnet_list and blocked_subnet_list are only applicable when is_pcl_enabled = true.

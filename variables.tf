@@ -10,8 +10,10 @@ variable "name" {
 
 variable "description" {
   description = "VPC peering description"
-  type        = string
-  default     = null
+
+  type     = string
+  default  = null
+  nullable = true
 }
 
 variable "availability_zone" {
@@ -19,8 +21,11 @@ variable "availability_zone" {
   type        = string
 
   validation {
-    condition     = length(trim(var.availability_zone, " ")) > 0
-    error_message = "availability_zone cannot be empty."
+    condition = contains(
+      ["S1", "S2", "S3"],
+      upper(var.availability_zone)
+    )
+    error_message = "Supported availability zones are S1, S2 and S3."
   }
 }
 
@@ -29,8 +34,11 @@ variable "region" {
   type        = string
 
   validation {
-    condition     = length(trim(var.region, " ")) > 0
-    error_message = "region cannot be empty."
+    condition = contains(
+      ["south"],
+      lower(var.region)
+    )
+    error_message = "Supported region values: south."
   }
 }
 
@@ -69,10 +77,25 @@ variable "allowed_subnet_list" {
   description = "List of allowed subnet IDs"
   type        = list(string)
   default     = []
+  validation {
+    condition     = length(var.allowed_subnet_list) == length(distinct(var.allowed_subnet_list))
+    error_message = "Duplicate subnet IDs are not allowed in allowed_subnet_list."
+  }
 }
 
 variable "blocked_subnet_list" {
   description = "List of blocked subnet IDs"
   type        = list(string)
   default     = []
+
+  validation {
+    condition = length(
+      setintersection(
+        toset(var.allowed_subnet_list),
+        toset(var.blocked_subnet_list)
+      )
+    ) == 0
+
+    error_message = "The same subnet cannot exist in both allowed_subnet_list and blocked_subnet_list."
+  }
 }
